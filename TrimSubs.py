@@ -294,9 +294,9 @@ def read_trims(avs, reversed_=False, label=None, line_number=None):
     'line_number' (starting with 1) if passed.
     
     """
-    re_line = re.compile(r'^[^#]*\bTrim\(\s*(\d+)\s*,\s*(-?\d+)\s*\).*{}'
+    re_line = re.compile(r'^[^#]*\bTrim\s*\(\s*(\d+)\s*,\s*(-?\d+)\s*\).*{}'
                          .format('#.*' + label if label else ''), re.IGNORECASE)
-    re_trim = re.compile(r'^[^#]*\bTrim\(\s*(\d+)\s*,\s*(-?\d+)\s*\)', 
+    re_trim = re.compile(r'^[^#]*\bTrim\s*\(\s*(\d+)\s*,\s*(-?\d+)\s*\)', 
                          re.IGNORECASE)
     with open(avs) as file:
         lines = file.readlines()
