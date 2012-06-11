@@ -1,0 +1,12 @@
+*/
+*.pyc
+*.pyo
+*.gz
+*.zip
+*.rar
+*.7z
+*.bat
+*.sh
+PKG-INFO
+setup.py
+pysubs-cli.py
