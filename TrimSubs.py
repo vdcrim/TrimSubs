@@ -71,88 +71,43 @@ with this program.  If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 # PREFERENCES
 
 # Suffix list for automatic search of a timecode file, if --fps is not supplied
-tc_suffix = ['.tc.txt', '.timecode.txt', '.timecodes.txt', 'timecode', 
-             'timecodes', '.txt']
+_tc_suffix = ['.tc.txt', '.timecode.txt', '.timecodes.txt', 'timecode', 
+              'timecodes', '.txt']
 
 # Default FPS, if --fps is not supplied and not timecode is found
-default_fps = '24000/1001'
+_default_fps = '24000/1001'
 
 # Default parsing order of the Avisynth script, overrided by --reversed argument
-parse_avs_top2bottom = True
+_parse_avs_top2bottom = True
 
 
 #-------------------------------------------------------------------------------
 
-from sys import exit, getfilesystemencoding
-from sys import version_info
-if version_info[:2] < (3,2):
+
+from sys import argv, exit, version_info, getfilesystemencoding
+if version_info < (3,2):
     exit('Python 3.2 is required')
 try:
     import pysubs
 except ImportError:
     exit('PySubs not found. \nPlease install PySubs, '
          'or put this script in the extraction directory.')
-from argparse import Action
+from os.path import isfile, splitext  
 import re
+from argparse import (ArgumentParser, RawDescriptionHelpFormatter, 
+                      HelpFormatter, Action)
 
-def main(arg):
-    
-    from argparse import (ArgumentParser, RawDescriptionHelpFormatter, 
-                          HelpFormatter)
-    from os.path import isfile, splitext  
-    
-    # Put the positional arguments before optionals in the 'usage' message
-    old_format = HelpFormatter._format_usage
-    def new_format(*a, **b):
-        re_usage = re.search(
-                          r'\A(\s*\S+\s+\S+)(\s+.*?)^\s*(\s+[^-]*?)\s*?(\n?)\Z', 
-                          old_format(*a, **b), re.MULTILINE | re.DOTALL)
-        return (re_usage.group(1) + re_usage.group(3) + '\n' + ' ' * 
-                len(re_usage.group(1)) + re_usage.group(2) + re_usage.group(4))
-    HelpFormatter._format_usage = new_format
-
-    description = ('Cut and resync text subtitle files according to Trims in '
+_description = ('Cut and resync text subtitle files according to Trims in '
                    'an existing\nAvisynth script')
-    parser = ArgumentParser(description=description, add_help=False, 
-                            formatter_class=RawDescriptionHelpFormatter)
-    info = parser.add_argument_group(title='Info arguments')
-    info.add_argument('-h', '--help', nargs='?', default=True, choices=['doc'], 
-                      action=HelpAction, help='Show this help message and exit.'
-                      " \nAdd 'doc' to include also the documentation")
-    info.add_argument('-V', '--version', action='version', 
-                  version='TrimSubs 0.2\nPySubs {}'.format(pysubs._version_str), 
-                  help="Show program's version number and exit")
-    required = parser.add_argument_group(title='Required arguments')
-    required.add_argument(metavar='script.avs', dest='avs', 
-                          help='Avisynth script containing Trims')
-    optional = parser.add_argument_group(title='Optional arguments', 
-                         description='(--input or --otc parameter is required)')
-    optional.add_argument('-v', '--verbose', action='store_true', 
-                          help='Show detailed info')
-    optional.add_argument('-r', '--reversed', action='store_true', 
-                          help='Parse the avs from bottom to top')
-    optional.add_argument('-l', '--label', help='Use the Trims from the line in'
-                          ' the avs that ends in a commentary with LABEL')
-    optional.add_argument('-g', '--line', type=int, help='Use the Trims from '
-                          'the line nº LINE')
-    optional.add_argument('-f', '--fps', help='Frame rate or timecode file \
-                          (v1 or v2). If omitted, search for a timecode file \
-                          or default to {}'.format(default_fps))
-    optional.add_argument('-t', '--otc', nargs='?', default=False, 
-                          help='Output a new timecode file. Path optional')
-    optional.add_argument('-i', '--input', nargs='?', default=False, 
-                          help='Input subtitle file. If INPUT is not specified,\
-                          search for a valid input file')
-    optional.add_argument('-c', '--encoding', 
-                          help='Input subtitle file encoding')
-    optional.add_argument('-o', '--output', 
-                          help='Custom path for the output subtitle file')
-    args = parser.parse_args()
-    
+_version = '0.2'
+
+def main():
+
+    args = _parser.parse_args()
     if not isfile(args.avs):
         exit('Invalid Avisynth script path')
     if not args.reversed:
-        args.reversed = not parse_avs_top2bottom
+        args.reversed = not _parse_avs_top2bottom
     avs_no_ext = splitext(args.avs)[0]
     if not isinstance(args.input, bool):
         if not args.input:
@@ -168,13 +123,13 @@ def main(arg):
     if not args.output and args.input:
         args.output = splitext(args.input)[0] + '.cut' + splitext(args.input)[1]
     if not args.fps:
-        for tc_path in (avs_no_ext + suffix for suffix in tc_suffix):
+        for tc_path in (avs_no_ext + suffix for suffix in _tc_suffix):
             if isfile(tc_path):
                 args.fps = tc_path
                 vfr = True
                 break
         else:
-            args.fps = default_fps
+            args.fps = _default_fps
             vfr = False
     else:
         vfr = isfile(args.fps) 
@@ -206,7 +161,7 @@ def main(arg):
               '\n  Output file:      ' + args.output)
     if not args.input and not args.otc:
         print('\nPlease specify input subtitle or output timecode parameter\n')
-        parser.print_usage()
+        _parser.print_usage()
         exit()
     
     # Read Trims from avs file
@@ -269,18 +224,73 @@ def main(arg):
         print('\nNew subtitle file written')
 
 
-class HelpAction(Action):
-    """Replacement of the default help argument of argparse
+def prepare_parser():
+    '''Define the command-line interface'''
     
-    Show docstring if required. Also, using a custom help action allows 
-    to change the argument group and help message.
-    """
-    def __call__(self, parser, namespace, values, option_string=None):
-        parser.print_help()
-        if values:
-           print('\nDOCUMENTATION\n\n' + __doc__)
-        exit()
-
+    class HelpAction(Action):
+        """Replacement of the default help argument of argparse
+        
+        Show docstring if required. Also, using a custom help action allows 
+        to change the argument group and help message.
+        """
+        def __call__(self, parser, namespace, values, option_string=None):
+            parser.print_help()
+            if values:
+               print('\nDOCUMENTATION\n\n' + __doc__)
+            exit()
+    
+    # Put the positional arguments before optionals in the 'usage' message
+    old_usage = HelpFormatter._format_usage
+    def new_usage(*a, **b):
+        re_usage = re.search(
+                          r'\A(\s*\S+\s+\S+)(\s+.*?)^\s*(\s+[^-]*?)\s*?(\n?)\Z', 
+                          old_usage(*a, **b), re.MULTILINE | re.DOTALL)
+        return (re_usage.group(1) + re_usage.group(3) + '\n' + ' ' * 
+                len(re_usage.group(1)) + re_usage.group(2) + re_usage.group(4))
+    HelpFormatter._format_usage = new_usage
+    
+    # Put 'description' before usage in the 'help' message
+    old_help = HelpFormatter.format_help
+    HelpFormatter.format_help = (lambda *a, **b: 
+                                 _description + '\n\n' + old_help(*a, **b))
+    
+    parser = ArgumentParser(prog='TrimSubs.py', add_help=False, 
+                            formatter_class=RawDescriptionHelpFormatter)
+    info = parser.add_argument_group(title='Info arguments')
+    info.add_argument('-h', '--help', nargs='?', default=True, choices=['full'],
+                      action=HelpAction, help='Show this help message and exit.'
+                      " \nAdd 'full' to include also the documentation and "
+                      'license')
+    info.add_argument('-V', '--version', action='version', 
+                  version='TrimSubs {}\nPySubs {}'.format(
+                          _version, pysubs._version_str), 
+                  help="Show program's version number and exit")
+    required = parser.add_argument_group(title='Required arguments')
+    required.add_argument(metavar='script.avs', dest='avs', 
+                          help='Avisynth script containing Trims')
+    optional = parser.add_argument_group(title='Optional arguments', 
+                         description='(--input or --otc parameter is required)')
+    optional.add_argument('-v', '--verbose', action='store_true', 
+                          help='Show detailed info')
+    optional.add_argument('-r', '--reversed', action='store_true', 
+                          help='Parse the avs from bottom to top')
+    optional.add_argument('-l', '--label', help='Use the Trims from the line in'
+                          ' the avs that ends in a commentary with LABEL')
+    optional.add_argument('-g', '--line', type=int, help='Use the Trims from '
+                          'the line nº LINE')
+    optional.add_argument('-f', '--fps', help='Frame rate or timecode file '
+                          '(v1 or v2). If omitted, search for a timecode file '
+                          'or default to {}'.format(_default_fps))
+    optional.add_argument('-t', '--otc', nargs='?', default=False, 
+                          help='Output a new timecode file. Path optional')
+    optional.add_argument('-i', '--input', nargs='?', default=False, 
+                          help='Input subtitle file. If INPUT is not specified,'
+                          ' search for a valid input file')
+    optional.add_argument('-c', '--encoding', 
+                          help='Input subtitle file encoding')
+    optional.add_argument('-o', '--output', 
+                          help='Custom path for the output subtitle file')
+    return parser
 
 def read_trims(avs, reversed_=False, label=None, line_number=None):
     """Parse Trims in an Avisynth script
@@ -604,6 +614,7 @@ def resync(subs, line, **vars):
                 line.shift(frame=trim.frame_shift, fps=vars['fps'])
             return line
 
+_parser = prepare_parser()
+
 if __name__ == '__main__':
-    from sys import argv
-    main(argv[1:])
+    main()

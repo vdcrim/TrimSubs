@@ -1,4 +1,7 @@
 */
+*.exe
+*.dll
+*.manifest
 *.pyc
 *.pyo
 *.gz
@@ -7,6 +10,7 @@
 *.7z
 *.bat
 *.sh
+*.bak
 PKG-INFO
 setup.py
 pysubs-cli.py
