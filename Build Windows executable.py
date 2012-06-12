@@ -76,7 +76,7 @@ for src, dst in files:
 # Generate a readme file in the temporal directory
 readme1 = 'TrimSubs - ' + description + '\n\n\nDESCRIPTION\n\nThis CLI utility'
 readme2 = doc[doc.index('This script') + len('This script'):
-              doc.index('Changelog')]
+              doc.index('Homepage')]
 readme3 = 'COMMAND LINE OPTIONS\n\nUsage: TrimSubs.exe '
 usage = parser.format_help()
 readme4 = usage[usage.index('script.avs'):]

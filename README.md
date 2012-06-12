@@ -1,5 +1,5 @@
-TrimSubs - Cut and resync text subtitle files according to Trims in an existing
-Avisynth script
+**TrimSubs - Cut and resync text subtitle files according to Trims in an existing
+Avisynth script**
 
 Requirements
 ------------
@@ -47,7 +47,7 @@ Supported subtitle formats: ASS, SSA, SRT, SUB (MicroDVD).
 Command line options
 --------------------
 
-    usage: TrimSubs.exe script.avs
+    usage: TrimSubs.py script.avs
                        [-h [{full}]] [-V] [-v] [-r] [-l LABEL] [-g LINE] [-f FPS]
                        [-t [OTC]] [-i [INPUT]] [-c ENCODING] [-o OUTPUT]
     
