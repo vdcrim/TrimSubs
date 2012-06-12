@@ -88,3 +88,17 @@ Changelog
       0.1 [2011-12-30]: initial release
       0.2 [2012-01-29]: added --line parameter 
                         support for negative second member of the Trim pair
+
+
+Links
+-----
+
+Doom9 Forum thread: <http://forum.doom9.org/showthread.php?t=163653>
+
+PySubs homepage: <https://github.com/tigr42/pysubs>
+
+Python homepage: <http://www.python.org/>
+
+Check out <https://github.com/wiiaboo/vfr>
+
+AvsP macro available at <https://github.com/vdcrim/avsp-macros>

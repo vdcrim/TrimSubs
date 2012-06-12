@@ -8,10 +8,15 @@ Requirements:
 - cx_Freeze <http://cx-freeze.sourceforge.net/>
 - PySubs <http://pypi.python.org/pypi/pysubs>
 - An archive with the source code of PySubs in the TrimSubs directory
+- The Microsoft Visual C runtime DLLs need to be present in the system to
+  be able to run the executable. That's often the case.  If not:
+  <https://www.microsoft.com/en-us/download/details.aspx?id=29>
 
-The Microsoft Visual C runtime DLLs need to be present in the system to
-be able to run the executable
-<https://www.microsoft.com/en-us/download/details.aspx?id=29>
+Optional:
+ - UPX: <http://upx.sourceforge.net/>
+   This utility is used to compress the executable files.  Put 'upx.exe' 
+   in the repository directory or set a custom path below.
+
 
 Copyright (C) 2012  Diego Fernández Gosende <dfgosende@gmail.com>
 
@@ -81,9 +86,8 @@ readme3 = 'COMMAND LINE OPTIONS\n\nUsage: TrimSubs.exe '
 usage = parser.format_help()
 readme4 = usage[usage.index('script.avs'):]
 readme5 = '\n\nCHANGELOG\n' + doc[doc.index('Changelog:') + len('Changelog:'):
-                                  doc.index('Homepage')]
-readme6 = '''
-LICENSE
+                                  doc.index('Copyright')]
+readme6 = '''LICENSE
 
 This program is a compiled Python 3 script. It uses PySubs as subtitle 
 framework. Source code is provided in the 'src' directory. 
