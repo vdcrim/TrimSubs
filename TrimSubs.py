@@ -305,7 +305,7 @@ def read_trims(avs, reversed_=False, label=None, line_number=None):
     
     """
     re_line = re.compile(r'^[^#]*\bTrim\s*\(\s*(\d+)\s*,\s*(-?\d+)\s*\).*{}'
-                         .format('#.*' + label if label else ''), re.IGNORECASE)
+                         .format('#\s*' + label if label else ''), re.IGNORECASE)
     re_trim = re.compile(r'^[^#]*\bTrim\s*\(\s*(\d+)\s*,\s*(-?\d+)\s*\)', 
                          re.IGNORECASE)
     with open(avs) as file:
